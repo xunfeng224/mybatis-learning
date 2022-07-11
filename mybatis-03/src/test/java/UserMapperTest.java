@@ -3,6 +3,7 @@ import com.xfeng.pojo.User;
 import com.xfeng.utils.MyBatisUtils;
 import junit.framework.TestCase;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.List;
@@ -41,5 +42,13 @@ public class UserMapperTest extends TestCase {
         System.out.println(i);
         sqlSeesion.commit();
         sqlSeesion.close();
+    }
+
+    static Logger logger = Logger.getLogger(UserMapperTest.class);
+    @Test
+    public void testLog4j(){
+        logger.info("log4j测试");
+        logger.error("log4j测试");
+        logger.debug("log4j测试");
     }
 }
