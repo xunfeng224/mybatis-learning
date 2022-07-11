@@ -1,8 +1,8 @@
 # MyBatis学习笔记
 
-## 简介
+## 一、简介
 
-### 什么是 MyBatis？
+### 1.什么是 MyBatis？
 
 1. MyBatis 是一款优秀的持久层框架，它支持自定义 SQL、存储过程以及高级映射。
 2. MyBatis 免除了几乎所有的 JDBC 代码以及设置参数和获取结果集的工作。
@@ -12,7 +12,7 @@
 
 **Maven Repository**:[Maven Repository: Search/Browse/Explore (mvnrepository.com)](https://mvnrepository.com/)
 
-### MyBatis特点
+### 2.MyBatis特点
 
 1. 简单易学：本身就很小且简单。没有任何第三方依赖，最简单安装只要两个jar文件+配置几个sql映射文件。易于学习，易于使用。通过文档和源代码，可以比较完全的掌握它的设计思路和实现。
 2. 灵活：mybatis不会对应用程序或者数据库的现有设计强加任何影响。 sql写在xml里，便于统一管理和优化。通过sql语句可以满足操作数据库的所有需求。
@@ -21,13 +21,13 @@
 5. 提供对象关系映射标签，支持对象关系组建维护。
 6. 提供xml标签，支持编写动态sql。 
 
-## Quick Start
+## 二、Quick Start
 
-### 项目整体结构
+### 1.项目整体结构
 
 ![image-20220711095107244](https://s2.loli.net/2022/07/11/eiYxMgN6w7skDuc.png)
 
-### mysql数据库
+### 2.mysql数据库
 
 新建数据库mybatis 新建表user
 
@@ -62,7 +62,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 
-### 安装MyBatis
+### 3.安装MyBatis
 
 > 要使用 MyBatis， 只需将 [mybatis-x.x.x.jar](https://github.com/mybatis/mybatis-3/releases) 文件置于类路径（classpath）中即可。
 >
@@ -144,7 +144,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 </project>
 ```
 
-### 从 XML 中构建 SqlSessionFactory
+### 4.从 XML 中构建 SqlSessionFactory
 
 1. 在study-mybatis下新建子maven项目mybatis-01,并在resources目录下 新建mybatis-config.xml
 
@@ -195,222 +195,221 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 
-2. 在项目路径下新建utils包,新建MyBatisUtils工具类,使用工具类获取sqlSessionFactory
+在项目路径下新建utils包,新建MyBatisUtils工具类,使用工具类获取sqlSessionFactory
+
+```java
+package com.xfeng.utils;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * @program: study-mybatis
+ * @description:
+ * @author: xiongfeng
+ * @create: 2022-07-08 21:51
+ **/
+public class MyBatisUtils {
+    private static SqlSessionFactory sqlSessionFactory;
+
+    static {
+        String resource = "mybatis-config.xml";
+        try {
+            InputStream inputStream = Resources.getResourceAsStream(resource);
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static SqlSession getSqlSeesion() {
+        return sqlSessionFactory.openSession();
+    }
+
+}
+```
+
+
+
+### 5.快速启动
+
+1. 新建dao包和pojo包
+
+   ![image-20220711095828812](https://s2.loli.net/2022/07/11/9PEzCrq3yVpAaYU.png)
+
+2. 新建UserMapper、UserMapper.xml、User类
+
+   UserMapper.java
 
    ```java
-   package com.xfeng.utils;
-   
-   import org.apache.ibatis.io.Resources;
-   import org.apache.ibatis.session.SqlSession;
-   import org.apache.ibatis.session.SqlSessionFactory;
-   import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-   import java.io.IOException;
-   import java.io.InputStream;
-   
+   package com.xfeng.dao;
+   import com.xfeng.pojo.User;
+   import java.util.List;
    /**
     * @program: study-mybatis
     * @description:
     * @author: xiongfeng
-    * @create: 2022-07-08 21:51
+    * @create: 2022-07-08 23:05
     **/
-   public class MyBatisUtils {
-       private static SqlSessionFactory sqlSessionFactory;
+   public interface UserMapper {
+       List<User> getUserList();
    
-       static {
-           String resource = "mybatis-config.xml";
-           try {
-               InputStream inputStream = Resources.getResourceAsStream(resource);
-               sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
+       User getById(int id);
    
+       int insertUser(User user);
    
-       }
+       int updateUser(User user);
    
-       public static SqlSession getSqlSeesion() {
-           return sqlSessionFactory.openSession();
-       }
-   
+       int deleteUser(int id);
    }
    ```
 
-   
+   UserMapper.xml
 
-   ### 快速启动
+   ```java
+   <?xml version="1.0" encoding="UTF-8" ?>
+   <!DOCTYPE mapper
+           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   <!--namespace 绑定一个对应的mapper接口-->
+   <mapper namespace="com.xfeng.dao.UserMapper">
+       <!--    select查询-->
+       <select id="getUserList" resultType="com.xfeng.pojo.User">
+           select * from mybatis.user;
+       </select>
+       <select id="getById" resultType="com.xfeng.pojo.User" parameterType="int">
+           select * from mybatis.user where id = #{id};
+       </select>
+       <insert id="insertUser"  parameterType="com.xfeng.pojo.User" >
+           insert into mybatis.user (id,name,pwd) values(#{id},#{name},#{pwd});
+       </insert>
+       <update id="updateUser" parameterType="com.xfeng.pojo.User">
+           update mybatis.user set name=#{name},pwd=#{pwd} where id =#{id};
+       </update>
+       <delete id="deleteUser" parameterType="int">
+           delete from mybatis.user where id = #{id};
+       </delete>
+   </mapper>
+   ```
 
-   1. 新建dao包和pojo包
+   User.java
 
-      ![image-20220711095828812](https://s2.loli.net/2022/07/11/9PEzCrq3yVpAaYU.png)
+   ```java
+   package com.xfeng.pojo;
+   /**
+    * @program: study-mybatis
+    * @description:
+    * @author: xiongfeng
+    * @create: 2022-07-08 22:02
+    **/
+   public class User {
+       private int id;
+       private String name;
+       private String pwd;
+   
+       public User() {
+       }
+   
+       public User(int id, String name, String pwd) {
+           this.id = id;
+           this.name = name;
+           this.pwd = pwd;
+       }
+   
+       public int getId() {
+           return id;
+       }
+   
+       public void setId(int id) {
+           this.id = id;
+       }
+   
+       public String getName() {
+           return name;
+       }
+   
+       public void setName(String name) {
+           this.name = name;
+       }
+   
+       public String getPwd() {
+           return pwd;
+       }
+   
+       public void setPwd(String pwd) {
+           this.pwd = pwd;
+       }
+   
+       @Override
+       public String toString() {
+           return "User{" +
+                   "id=" + id +
+                   ", name='" + name + '\'' +
+                   ", pwd='" + pwd + '\'' +
+                   '}';
+       }
+   }
+   ```
 
-   2. 新建UserMapper、UserMapper.xml、User类
+   3.Junit启动
 
-      UserMapper.java
+   ```java
+   package dao;
+   import com.xfeng.dao.UserMapper;
+   import com.xfeng.pojo.User;
+   import com.xfeng.utils.MyBatisUtils;
+   import org.apache.ibatis.session.SqlSession;
+   import org.junit.Test;
+   
+   
+   public class UserMapperTest {
+       @Test
+       public void test() {
+           //获取SqlSession对象
+           SqlSession sqlSeesion = MyBatisUtils.getSqlSeesion();
+           //方式一：getMapper
+           UserMapper userMapper = sqlSeesion.getMapper(UserMapper.class);
+   //        List<User> userList = userMapper.getUserList();
+   //        for(User user:userList){
+   //            System.out.println(user);
+   //        }
+   
+           User byId = userMapper.getById(1);
+           System.out.println(byId);
+           sqlSeesion.close();
+       }
+       @Test
+       public void insertUser(){
+           SqlSession sqlSeesion = MyBatisUtils.getSqlSeesion();
+           UserMapper userMapper = sqlSeesion.getMapper(UserMapper.class);
+   //        int res = userMapper.insertUser(new User(6, "xiaoming6", "1"));
+   //        if(res>0){
+   //            System.out.println("插入成功");
+   //        }
+   
+   
+   
+           int res2 = userMapper.updateUser(new User(6, "xiaoming6", "1"));
+           System.out.println(res2);
+   
+           int i = userMapper.deleteUser(6);
+           System.out.println(i);
+           sqlSeesion.commit();
+           sqlSeesion.close();
+       }
+   }
+   ```
 
-      ```java
-      package com.xfeng.dao;
-      import com.xfeng.pojo.User;
-      import java.util.List;
-      /**
-       * @program: study-mybatis
-       * @description:
-       * @author: xiongfeng
-       * @create: 2022-07-08 23:05
-       **/
-      public interface UserMapper {
-          List<User> getUserList();
-      
-          User getById(int id);
-      
-          int insertUser(User user);
-      
-          int updateUser(User user);
-      
-          int deleteUser(int id);
-      }
-      ```
-   
-      UserMapper.xml
-   
-      ```java
-      <?xml version="1.0" encoding="UTF-8" ?>
-      <!DOCTYPE mapper
-              PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-              "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-      <!--namespace 绑定一个对应的mapper接口-->
-      <mapper namespace="com.xfeng.dao.UserMapper">
-          <!--    select查询-->
-          <select id="getUserList" resultType="com.xfeng.pojo.User">
-              select * from mybatis.user;
-          </select>
-          <select id="getById" resultType="com.xfeng.pojo.User" parameterType="int">
-              select * from mybatis.user where id = #{id};
-          </select>
-          <insert id="insertUser"  parameterType="com.xfeng.pojo.User" >
-              insert into mybatis.user (id,name,pwd) values(#{id},#{name},#{pwd});
-          </insert>
-          <update id="updateUser" parameterType="com.xfeng.pojo.User">
-              update mybatis.user set name=#{name},pwd=#{pwd} where id =#{id};
-          </update>
-          <delete id="deleteUser" parameterType="int">
-              delete from mybatis.user where id = #{id};
-          </delete>
-      </mapper>
-      ```
-   
-      User.java
-   
-      ```java
-      package com.xfeng.pojo;
-      /**
-       * @program: study-mybatis
-       * @description:
-       * @author: xiongfeng
-       * @create: 2022-07-08 22:02
-       **/
-      public class User {
-          private int id;
-          private String name;
-          private String pwd;
-      
-          public User() {
-          }
-      
-          public User(int id, String name, String pwd) {
-              this.id = id;
-              this.name = name;
-              this.pwd = pwd;
-          }
-      
-          public int getId() {
-              return id;
-          }
-      
-          public void setId(int id) {
-              this.id = id;
-          }
-      
-          public String getName() {
-              return name;
-          }
-      
-          public void setName(String name) {
-              this.name = name;
-          }
-      
-          public String getPwd() {
-              return pwd;
-          }
-      
-          public void setPwd(String pwd) {
-              this.pwd = pwd;
-          }
-      
-          @Override
-          public String toString() {
-              return "User{" +
-                      "id=" + id +
-                      ", name='" + name + '\'' +
-                      ", pwd='" + pwd + '\'' +
-                      '}';
-          }
-      }
-      ```
-   
-      3.Junit启动
-   
-      ```java
-      package dao;
-      import com.xfeng.dao.UserMapper;
-      import com.xfeng.pojo.User;
-      import com.xfeng.utils.MyBatisUtils;
-      import org.apache.ibatis.session.SqlSession;
-      import org.junit.Test;
-      
-      
-      public class UserMapperTest {
-          @Test
-          public void test() {
-              //获取SqlSession对象
-              SqlSession sqlSeesion = MyBatisUtils.getSqlSeesion();
-              //方式一：getMapper
-              UserMapper userMapper = sqlSeesion.getMapper(UserMapper.class);
-      //        List<User> userList = userMapper.getUserList();
-      //        for(User user:userList){
-      //            System.out.println(user);
-      //        }
-      
-              User byId = userMapper.getById(1);
-              System.out.println(byId);
-              sqlSeesion.close();
-          }
-          @Test
-          public void insertUser(){
-              SqlSession sqlSeesion = MyBatisUtils.getSqlSeesion();
-              UserMapper userMapper = sqlSeesion.getMapper(UserMapper.class);
-      //        int res = userMapper.insertUser(new User(6, "xiaoming6", "1"));
-      //        if(res>0){
-      //            System.out.println("插入成功");
-      //        }
-      
-      
-      
-              int res2 = userMapper.updateUser(new User(6, "xiaoming6", "1"));
-              System.out.println(res2);
-      
-              int i = userMapper.deleteUser(6);
-              System.out.println(i);
-              sqlSeesion.commit();
-              sqlSeesion.close();
-          }
-      }
-      ```
-   
-      
 
-## 属性优化、类型别名、映射器
+## 三、属性优化、类型别名、映射器
 
-### 属性优化
+### 1.属性优化
 
 **官方中文文档：**
 
@@ -523,7 +522,7 @@ mybatis-cofing.xml
 </configuration>
 ```
 
-### 类型别名
+### 2.类型别名
 
 **官方中文文档：**
 
@@ -559,7 +558,7 @@ mybatis-cofing.xml
 > }
 > ```
 
-### 映射器
+### 3.映射器
 
 > 既然 MyBatis 的行为已经由上述元素配置完了，我们现在就要来定义 SQL 映射语句了。 但首先，我们需要告诉 MyBatis 到哪里去找到这些语句。 在自动查找资源方面，Java 并没有提供一个很好的解决方案，所以最好的办法是直接告诉 MyBatis 到哪里去找映射文件。 你可以使用相对于类路径的资源引用，或完全限定资源定位符（包括 `file:///` 形式的 URL），或类名和包名等。例如：
 >
@@ -590,7 +589,7 @@ mybatis-cofing.xml
 > </mappers>
 > ```
 
-## 作用域（Scope）和生命周期
+## 四、作用域（Scope）和生命周期
 
 > 理解我们之前讨论过的不同作用域和生命周期类别是至关重要的，因为错误的使用会导致非常严重的并发问题。
 >
@@ -633,7 +632,7 @@ mybatis-cofing.xml
 > }
 > ```
 
-## 结果映射resultMap
+## 五、结果映射resultMap
 
 > `resultMap` 元素是 MyBatis 中最重要最强大的元素。它可以让你从 90% 的 JDBC `ResultSets` 数据提取代码中解放出来，并在一些情形下允许你进行一些 JDBC 不支持的操作。实际上，在为一些比如连接的复杂语句编写映射代码的时候，一份 `resultMap` 能够代替实现同等功能的数千行代码。ResultMap 的设计思想是，对简单的语句做到零配置，对于复杂一点的语句，只需要描述语句之间的关系就行了。
 
@@ -880,7 +879,7 @@ StudentMapper.xml
 </mapper>
 ```
 
-**多对一** 使用集合collection
+**一对多** 使用集合collection
 
 TeacherMapper.xml
 
@@ -934,12 +933,18 @@ TeacherMapper.xml
 </mapper>
 ```
 
+**小结**
+
+**多对一**  使用关联 association、
+
+**一对多** 使用集合collection
+
 javaType 用来指定实体类中属性的类型
 ofType 用来指定映射到List或者集合中的pojo类型，泛型中的约束类型
 
 
 
-## 日志工厂
+## 六、日志工厂
 
 ### 标准日志输出STDOUT_LOGGING
 
@@ -1003,7 +1008,7 @@ static Logger logger = Logger.getLogger(UserMapperTest.class);
     }
 ```
 
-## Limit分页
+## 七、Limit分页
 
 **为什么要使用分页？**减少数据量，提高系统新能响应速度
 
@@ -1021,7 +1026,7 @@ static Logger logger = Logger.getLogger(UserMapperTest.class);
 
    [MyBatis 分页插件 PageHelper](https://pagehelper.github.io/)
 
-## 简单注解的使用
+## 八、简单注解的使用
 
 ```java
 @Select("select * from user where id = #{id}")
@@ -1030,13 +1035,13 @@ User getById(@Param("id") int id,@Param("name") String name);
 
 
 
-## 工作原理以及核心流程详解
+## 九、工作原理以及核心流程详解
 
 
 
 
 
-![mybatis.png](326517643.png)
+![mybatis.png](https://s2.loli.net/2022/07/11/SlOiy5fkcbrzaJZ.png)
 
 上面中流程就是MyBatis内部核心流程，每一步流程的详细说明如下文所述：
 
@@ -1055,3 +1060,75 @@ User getById(@Param("id") int id,@Param("name") String name);
 （7）输入参数映射。输入参数类型可以是Map、List等集合类型，也可以是基本数据类型和POJO类型。输入参数映射过程类似于JDBC对preparedStatement对象设置参数的过程。
 
 （8）输出结果映射。输出结果类型可以是Map、List等集合类型，也可以是基本数据类型和POJO类型。输出结果映射过程类似于JDBC对结果集的解析过程。
+
+
+
+## 十、动态SQL
+
+
+
+
+
+## 十一、MyBatis缓存
+
+### 1.简介
+
+**什么是缓存？**
+
+- 就是将用户经常查询的数据的结果的一个保存，保存到一个内存中（缓存就是内存中的一个对象），用户在查询的时候就不用到数据库文件中查询（磁盘），
+- 从而减少与数据库的交付次数提高了响应速度，解决了并发系统的性能问题。
+
+**为什么使用缓存？**
+
+- 减少和数据库的交互操作，减少系统开销，提高系统效率
+
+什么样的数据能使用缓存？
+
+- 经常查询并且不经常改变的数据
+
+### 2.MyBatis缓存分类
+
+MyBatis提供了一级缓存和二级缓存
+
+- 一级缓存：也称为本地缓存，用于保存用户在**一次会话**过程中查询的结果，用户一次会话中只能使用一个sqlSession，一级缓存是自动开启的，不允许关闭。
+- 二级缓存：也称为全局缓存，是mapper级别的缓存，是针对一个表的查结果的存储，可以共享给所有针对这张表的查询的用户。也就是说对于mapper级别的缓存不同的sqlsession是可以共享的。
+
+**会话**就是一次完整的交流，再一次交流过程中包含多次请求响应，而发送的请求都是同一个用户，SqlSession就是用户与数据库进行一次会话过程中使用的接口。
+
+> - 映射语句文件中的所有 select 语句的结果将会被缓存。
+> - 映射语句文件中的所有 insert、update 和 delete 语句会刷新缓存。
+> - 缓存会使用最近最少使用算法（LRU, Least Recently Used）算法来清除不需要的缓存。
+> - 缓存不会定时进行刷新（也就是说，没有刷新间隔）。
+> - 缓存会保存列表或对象（无论查询方法返回哪种）的 1024 个引用。
+> - 缓存会被视为读/写缓存，这意味着获取到的对象并不是共享的，可以安全地被调用者修改，而不干扰其他调用者或线程所做的潜在修改。
+
+### 3.二级缓存
+
+二级缓存的开启
+
+```xml
+<settings>
+       <!--MyBatis核心配置文件中开启缓存，默认就是为true-->
+        <setting name="cacheEnabled" value="true"/>
+</settings>
+```
+
+> 默认情况下，只启用了本地的会话缓存，它仅仅对一个会话中的数据进行缓存。 要启用全局的二级缓存，只需要在你的 SQL 映射文件中添加一行：
+>
+> ```xml
+> <cache/>
+> ```
+
+> 缓存只作用于 cache 标签所在的映射文件中的语句。如果你混合使用 Java API 和 XML 映射文件，在共用接口中的语句将不会被默认缓存。你需要使用 @CacheNamespaceRef 注解指定缓存作用域。
+>
+> 这些属性可以通过 cache 元素的属性来修改。比如：
+>
+> ```xml
+> <cache
+>   eviction="FIFO"
+>   flushInterval="60000"
+>   size="512"
+>   readOnly="true"/>
+> ```
+>
+> 这个更高级的配置创建了一个 FIFO 缓存，每隔 60 秒刷新，最多可以存储结果对象或列表的 512 个引用，而且返回的对象被认为是只读的，因此对它们进行修改可能会在不同线程中的调用者产生冲突。

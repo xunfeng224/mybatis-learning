@@ -4,6 +4,7 @@ import com.xfeng.pojo.Student;
 import com.xfeng.pojo.Teacher;
 import com.xfeng.utils.MyBatisUtils;
 import junit.framework.TestCase;
+import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
 
