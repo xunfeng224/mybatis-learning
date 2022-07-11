@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace 绑定一个对应的mapper接口-->
+<mapper namespace="com.xfeng.dao.UserMapper">
+
+
+<!--    ResultMap 的设计思想是，对简单的语句做到零配置，对于复杂一点的语句，只需要描述语句之间的关系就行了。-->
+<!--    使用resultType可以将查询出来的结果映射到JavaBean或者POJO类，在这些情况下，MyBatis 会在幕后自动创建一个 ResultMap，再根据属性名来映射列到 JavaBean 的属性上。-->
+<!--    下面的resultMap可以解决数据库列名和属性名不匹配的问题，将相应的mybatis DMl语句中的resultType改为resultMap = 具体的resultMap的id即可-->
+<resultMap id="resultMapUser" type="user">
+    <id property="id" column="id"></id>
+    <result property="name" column="name"></result>
+    <result property="password" column="pwd"></result>
+</resultMap>
+
+    <!--    select查询-->
+    <select id="getUserList" resultMap="resultMapUser">
+        select * from mybatis.user;
+    </select>
+    <select id="getById" resultType="User" parameterType="int">
+        select * from mybatis.user where id = #{id};
+    </select>
+    <insert id="insertUser"  parameterType="User" >
+        insert into mybatis.user (id,name,pwd) values(#{id},#{name},#{pwd});
+    </insert>
+    <update id="updateUser" parameterType="User">
+        update mybatis.user set name=#{name},pwd=#{pwd} where id =#{id};
+    </update>
+    <delete id="deleteUser" parameterType="int">
+        delete from mybatis.user where id = #{id};
+    </delete>
+</mapper>

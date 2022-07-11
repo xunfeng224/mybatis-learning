@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--核心配置文件-->
+<configuration>
+    <properties resource="db.properties"/>
+
+    <!--    类型别名（typeAliases）-->
+    <!--    类型别名可为 Java 类型设置一个缩写名字。 它仅用于 XML 配置，意在降低冗余的全限定类名书写。-->
+    <typeAliases>
+        <!--      当这样配置时，User 可以用在任何使用 com.xfeng.pojo.User 的地方。  -->
+        <typeAlias type="com.xfeng.pojo.User" alias="User"/>
+        <!--        也可以指定一个包名，MyBatis 会在包名下面搜索需要的 Java Bean
+        每一个在包 domain.blog 中的 Java Bean，在没有注解的情况下，会使用 Bean 的首字母小写的非限定类名来作为它的别名。
+        比如 domain.blog.Author 的别名为 author；若有注解，则别名为其注解值。 @Alias("user11")
+        -->
+        <package name="com.xfeng.pojo"/>
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+            <!--            默认使用JDBC事务管理-->
+            <!--            在 MyBatis 中有两种类型的事务管理器（也就是 type="[JDBC|MANAGED]"）：
+            如果你正在使用 Spring + MyBatis，则没有必要配置事务管理器，因为 Spring 模块会使用自带的管理器来覆盖前面的配置。-->
+            <transactionManager type="JDBC"/>
+            <!--            数据库连接-->
+            <!--            有三种内建的数据源类型（也就是 type="[UNPOOLED|POOLED|JNDI]"）-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+
+    <!--    每一个Mapper.xml都需要在Mybatis核心配置文件中注册！-->
+    <mappers>
+        <!-- 使用相对于类路径的资源引用 推荐使用 -->
+        <mapper resource="com/xfeng/dao/UserMapper.xml"/>
+        <!--        注意：1.接口和Mapper文件必须同名 2.接口和Mapper文件必须在同一包下-->
+        <!-- 使用映射器接口实现类的完全限定类名 -->
+<!--        <mapper class="org.mybatis.builder.AuthorMapper"/>-->
+<!--        <mapper class="org.mybatis.builder.BlogMapper"/>-->
+<!--        <mapper class="org.mybatis.builder.PostMapper"/>-->
+<!--        &lt;!&ndash; 将包内的映射器接口实现全部注册为映射器 &ndash;&gt;-->
+<!--        <package name="org.mybatis.builder"/>-->
+    </mappers>
+
+
+</configuration>
