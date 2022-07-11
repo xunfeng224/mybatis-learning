@@ -566,25 +566,27 @@ mybatis-cofing.xml
 > ```
 > <!-- 使用相对于类路径的资源引用 -->
 > <mappers>
->   <mapper resource="org/mybatis/builder/AuthorMapper.xml"/>
->   <mapper resource="org/mybatis/builder/BlogMapper.xml"/>
->   <mapper resource="org/mybatis/builder/PostMapper.xml"/>
+> <mapper resource="org/mybatis/builder/AuthorMapper.xml"/>
+> <mapper resource="org/mybatis/builder/BlogMapper.xml"/>
+> <mapper resource="org/mybatis/builder/PostMapper.xml"/>
 > </mappers>
 > <!-- 使用完全限定资源定位符（URL） --> <!-- 不建议使用 -->
 > <mappers>
->   <mapper url="file:///var/mappers/AuthorMapper.xml"/>
->   <mapper url="file:///var/mappers/BlogMapper.xml"/>
->   <mapper url="file:///var/mappers/PostMapper.xml"/>
+> <mapper url="file:///var/mappers/AuthorMapper.xml"/>
+> <mapper url="file:///var/mappers/BlogMapper.xml"/>
+> <mapper url="file:///var/mappers/PostMapper.xml"/>
 > </mappers>
+> 
+> <!--        注意下面两种：1.接口和Mapper文件必须同名 2.接口和Mapper文件必须在同一包下-->
 > <!-- 使用映射器接口实现类的完全限定类名 -->
 > <mappers>
->   <mapper class="org.mybatis.builder.AuthorMapper"/>
->   <mapper class="org.mybatis.builder.BlogMapper"/>
->   <mapper class="org.mybatis.builder.PostMapper"/>
+> <mapper class="org.mybatis.builder.AuthorMapper"/>
+> <mapper class="org.mybatis.builder.BlogMapper"/>
+> <mapper class="org.mybatis.builder.PostMapper"/>
 > </mappers>
 > <!-- 将包内的映射器接口实现全部注册为映射器 -->
 > <mappers>
->   <package name="org.mybatis.builder"/>
+> <package name="org.mybatis.builder"/>
 > </mappers>
 > ```
 
@@ -740,6 +742,201 @@ public class User {
 
 ### 复杂结果映射
 
+准备工作 创建teacher和student表，创建对应pojo类和mapper等文件
+
+```sql
+DROP TABLE IF EXISTS `student`;
+CREATE TABLE `student`  (
+  `id` int NOT NULL,
+  `name` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `tid` int NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `fktid`(`tid`) USING BTREE,
+  CONSTRAINT `fktid` FOREIGN KEY (`tid`) REFERENCES `teacher` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of student
+-- ----------------------------
+INSERT INTO `student` VALUES (1, '小明', 1);
+INSERT INTO `student` VALUES (2, '小红', 1);
+INSERT INTO `student` VALUES (3, '小张', 1);
+INSERT INTO `student` VALUES (4, '小李', 1);
+INSERT INTO `student` VALUES (5, '小王', 2);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+DROP TABLE IF EXISTS `teacher`;
+CREATE TABLE `teacher`  (
+  `id` int NOT NULL,
+  `name` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of teacher
+-- ----------------------------
+INSERT INTO `teacher` VALUES (1, '秦老师');
+INSERT INTO `teacher` VALUES (2, '李老师');
+
+SET FOREIGN_KEY_CHECKS = 1;
+```
+
+
+
+**student.java**:
+
+```java
+package com.xfeng.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @program: study-mybatis
+ * @description:
+ * @author: xiongfeng
+ * @create: 2022-07-11 15:10
+ **/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Student {
+    private int id;
+    private String name;
+    private Teacher teacher;
+}
+```
+
+**Teacher.java** :
+
+```java
+package com.xfeng.pojo;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.util.List;
+
+/**
+ * @program: study-mybatis
+ * @description:
+ * @author: xiongfeng
+ * @create: 2022-07-11 15:12
+ **/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Teacher {
+    private String name;
+    private int id;
+    private List<Student> studentList;
+}
+
+```
+
+**多对一**  使用关联 association 
+
+StudentMapper.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--核心配置文件-->
+<mapper namespace="com.xfeng.dao.StudentMapper">
+    <!--第一种方式 按照结果嵌套处理-->
+    <resultMap id="StudentAndTeacher2" type="Student">
+        <result property="id" column="sid"></result>
+        <result property="name" column="sname"></result>
+        <association property="teacher" javaType="Teacher">
+            <result property="id" column="tid"></result>
+            <result property="name" column="tname"></result>
+        </association>
+    </resultMap>
+    <select id="getStudent2" resultMap="StudentAndTeacher2">
+        select s.name sname, s.id sid, t.id tid, t.name tname
+        from mybatis.student s,
+             mybatis.teacher t
+        where t.id = s.tid
+    </select>
+    <!--    第二种方式 按照查询嵌套处理-->
+    <resultMap id="StudentAndTeacher" type="Student">
+        <result property="id" column="id"></result>
+        <result property="name" column="name"></result>
+        <!--        复杂的属性需要单独处理
+                    对象使用:association
+                    集合使用:collection
+        -->
+        <association property="teacher" column="tid" javaType="Teacher"
+                     select="com.xfeng.dao.TeacherMapper.getTeacherById">
+        </association>
+    </resultMap>
+    <select id="getStudent" resultMap="StudentAndTeacher">
+        select *
+        from mybatis.student
+    </select>
+</mapper>
+```
+
+**多对一** 使用集合collection
+
+TeacherMapper.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--核心配置文件-->
+<mapper namespace="com.xfeng.dao.TeacherMapper">
+
+
+    <select id="getTeacherById" parameterType="int" resultType="Teacher">
+        select *
+        from mybatis.teacher
+        where id = #{id}
+    </select>
+    <!-- 第一种方式 按照结果嵌套处理-->
+    <resultMap id="TeacherAndStudents1" type="Teacher">
+        <result property="id" column="tid"></result>
+        <result property="name" column="tname"></result>
+        <collection property="studentList" ofType="Student">
+            <result property="id" column="sid"></result>
+            <result property="name" column="sname"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getTeacherById1" resultMap="TeacherAndStudents1">
+        select t.id tid, t.name tname, s.id sid, s.name sname, s.tid stid
+        from mybatis.teacher t,
+             mybatis.student s
+        where t.id = s.tid
+    </select>
+    <!--    第二种方式 按照查询嵌套处理-->
+    <resultMap id="TeacherAndStudents2" type="Teacher">
+        <collection property="studentList" javaType="ArrayList" ofType="Student" select="getStudentByTeacherId"
+                    column="id">
+            <result property="id" column="id"></result>
+            <result property="name" column="name"></result>
+        </collection>
+    </resultMap>
+    <select id="getTeacherById2" resultMap="TeacherAndStudents2">
+        select *
+        from mybatis.teacher
+    </select>
+    <select id="getStudentByTeacherId" resultType="Student">
+        select *
+        from mybatis.student
+        where tid = #{tid}
+    </select>
+</mapper>
+```
+
+javaType 用来指定实体类中属性的类型
+ofType 用来指定映射到List或者集合中的pojo类型，泛型中的约束类型
+
 
 
 ## 日志工厂
@@ -806,3 +1003,55 @@ static Logger logger = Logger.getLogger(UserMapperTest.class);
     }
 ```
 
+## Limit分页
+
+**为什么要使用分页？**减少数据量，提高系统新能响应速度
+
+1. 使用MyBatis实现分页，核心SQL
+
+```xml
+<select id="getUserList" parameterType="map" resultMap="resultMapUser">
+     select * from mybatis.user limit #{startIndex},#{pageSiez};
+</select>
+```
+
+2. 使用RowBounds，注意是逻辑分页，数据读取到内存中再分页拿取
+
+3. 分页插件
+
+   [MyBatis 分页插件 PageHelper](https://pagehelper.github.io/)
+
+## 简单注解的使用
+
+```java
+@Select("select * from user where id = #{id}")
+User getById(@Param("id") int id,@Param("name") String name);
+```
+
+
+
+## 工作原理以及核心流程详解
+
+
+
+
+
+![mybatis.png](326517643.png)
+
+上面中流程就是MyBatis内部核心流程，每一步流程的详细说明如下文所述：
+
+（1）读取MyBatis的配置文件。mybatis-config.xml为MyBatis的全局配置文件，用于配置数据库连接信息。
+
+（2）加载映射文件。映射文件即SQL映射文件，该文件中配置了操作数据库的SQL语句，需要在MyBatis配置文件mybatis-config.xml中加载。mybatis-config.xml 文件可以加载多个映射文件，每个文件对应数据库中的一张表。
+
+（3）构造会话工厂。通过MyBatis的环境配置信息构建会话工厂SqlSessionFactory。
+
+（4）创建会话对象。由会话工厂创建SqlSession对象，该对象中包含了执行SQL语句的所有方法。
+
+（5）Executor执行器。MyBatis底层定义了一个Executor接口来操作数据库，它将根据SqlSession传递的参数动态地生成需要执行的SQL语句，同时负责查询缓存的维护。
+
+（6）MappedStatement对象。在Executor接口的执行方法中有一个MappedStatement类型的参数，该参数是对映射信息的封装，用于存储要映射的SQL语句的id、参数等信息。
+
+（7）输入参数映射。输入参数类型可以是Map、List等集合类型，也可以是基本数据类型和POJO类型。输入参数映射过程类似于JDBC对preparedStatement对象设置参数的过程。
+
+（8）输出结果映射。输出结果类型可以是Map、List等集合类型，也可以是基本数据类型和POJO类型。输出结果映射过程类似于JDBC对结果集的解析过程。

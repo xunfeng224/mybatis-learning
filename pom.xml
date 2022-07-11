@@ -12,6 +12,7 @@
         <module>mybatis-01</module>
         <module>mybatis-02</module>
         <module>mybatis-03</module>
+        <module>mybatis-04</module>
     </modules>
     <dependencies>
         <!--        MyBatis jar包导入-->
@@ -31,6 +32,18 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
         </dependency>
     </dependencies>
 
