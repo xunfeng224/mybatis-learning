@@ -25,7 +25,7 @@
 
 ### 1.项目整体结构
 
-![eiYxMgN6w7skDuc](images/eiYxMgN6w7skDuc.png)
+![eiYxMgN6w7skDuc](https://xunfeng-images.oss-cn-shenzhen.aliyuncs.com/xfTyporaImages/eiYxMgN6w7skDuc.png)
 
 ### 2.mysql数据库
 
@@ -241,7 +241,7 @@ public class MyBatisUtils {
 
 1. 新建dao包和pojo包
 
-   ![9PEzCrq3yVpAaYU](images/9PEzCrq3yVpAaYU.png)
+   ![9PEzCrq3yVpAaYU](https://xunfeng-images.oss-cn-shenzhen.aliyuncs.com/xfTyporaImages/9PEzCrq3yVpAaYU.png)
 
 2. 新建UserMapper、UserMapper.xml、User类
 
@@ -994,7 +994,7 @@ log4j.logger.java.sql.PreparedStatement=DEBUG
 
 日志输出：
 
-![nyZzom8RkgLAGvt](images/nyZzom8RkgLAGvt.png)
+![nyZzom8RkgLAGvt](https://xunfeng-images.oss-cn-shenzhen.aliyuncs.com/xfTyporaImages/nyZzom8RkgLAGvt.png)
 
 
 
@@ -1039,7 +1039,7 @@ User getById(@Param("id") int id,@Param("name") String name);
 
 
 
-![SlOiy5fkcbrzaJZ](images/SlOiy5fkcbrzaJZ.png)
+![SlOiy5fkcbrzaJZ](https://xunfeng-images.oss-cn-shenzhen.aliyuncs.com/xfTyporaImages/SlOiy5fkcbrzaJZ.png)
 
 
 
