@@ -1,5 +1,7 @@
 # MyBatis学习笔记
 
+源码地址：[MyBatis学习笔记: 复习MyBatis (gitee.com)](https://gitee.com/xfeng520/mybatis-learning)
+
 ## 一、简介
 
 ### 1.什么是 MyBatis？
