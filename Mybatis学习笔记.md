@@ -25,7 +25,7 @@
 
 ### 1.项目整体结构
 
-![image-20220711095107244](https://s2.loli.net/2022/07/11/eiYxMgN6w7skDuc.png)
+![eiYxMgN6w7skDuc](images/eiYxMgN6w7skDuc.png)
 
 ### 2.mysql数据库
 
@@ -241,7 +241,7 @@ public class MyBatisUtils {
 
 1. 新建dao包和pojo包
 
-   ![image-20220711095828812](https://s2.loli.net/2022/07/11/9PEzCrq3yVpAaYU.png)
+   ![9PEzCrq3yVpAaYU](images/9PEzCrq3yVpAaYU.png)
 
 2. 新建UserMapper、UserMapper.xml、User类
 
@@ -994,7 +994,7 @@ log4j.logger.java.sql.PreparedStatement=DEBUG
 
 日志输出：
 
-![image-20220711105106124](https://s2.loli.net/2022/07/11/nyZzom8RkgLAGvt.png)
+![nyZzom8RkgLAGvt](images/nyZzom8RkgLAGvt.png)
 
 
 
@@ -1039,9 +1039,9 @@ User getById(@Param("id") int id,@Param("name") String name);
 
 
 
+![SlOiy5fkcbrzaJZ](images/SlOiy5fkcbrzaJZ.png)
 
 
-![mybatis.png](https://s2.loli.net/2022/07/11/SlOiy5fkcbrzaJZ.png)
 
 上面中流程就是MyBatis内部核心流程，每一步流程的详细说明如下文所述：
 
